@@ -1,0 +1,10 @@
+{
+    "name": "icu0755/cme_data_storage",
+    "authors": [
+        {
+            "name": "Vladimir Ivanov",
+            "email": "vladimir.ivanov@fastdev.se"
+        }
+    ],
+    "require": {}
+}
