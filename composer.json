@@ -6,5 +6,13 @@
             "email": "vladimir.ivanov@fastdev.se"
         }
     ],
-    "require": {}
+    "require": {
+        "dropbox/dropbox-sdk": "~1.1",
+        "symfony/console": "~2.6"
+    },
+    "autoload": {
+        "psr-0": {
+            "Icu0755\\": "lib/"
+        }
+    }
 }
