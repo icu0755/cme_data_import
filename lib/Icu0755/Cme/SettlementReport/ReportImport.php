@@ -1,10 +1,9 @@
 <?php
-namespace Icu0755\Cme;
+namespace Icu0755\Cme\SettlementReport;
 
-use Icu0755\Cme\Downloader\SaveFile;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class Downloader
+class ReportImport implements HandlerInterface
 {
     protected $curl;
 
@@ -12,10 +11,11 @@ class Downloader
 
     protected $data;
 
-    /**
-     * @var SaveFile
-     */
-    protected $save;
+    protected $defaultOptions;
+
+    protected $file;
+
+    protected $sourcePath;
 
     /**
      * @var ProgressBar
@@ -24,10 +24,11 @@ class Downloader
 
     protected $url;
 
-    function __construct($url)
+    function __construct()
     {
-        $this->url = $url;
-        $this->save = new SaveFile();
+        $this->defaultOptions = array(
+            'reportUrl' => 'ftp://ftp.cmegroup.com/pub/settle/stlcur',
+        );
     }
 
     public function download()
@@ -41,10 +42,12 @@ class Downloader
 
     protected function init()
     {
+        $this->file = fopen($this->sourcePath, 'w');
         if ($this->curl = curl_init($this->url)) {
             curl_setopt($this->curl, CURLOPT_NOPROGRESS, false);
             curl_setopt($this->curl, CURLOPT_PROGRESSFUNCTION, array($this, 'progressCallback'));
             curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($this->curl, CURLOPT_FILE, $this->file);
         }
     }
 
@@ -53,8 +56,7 @@ class Downloader
         if ($this->curl) {
             curl_close($this->curl);
         }
-
-        $this->save();
+        fclose($this->file);
         $this->finishProgress();
     }
 
@@ -74,6 +76,22 @@ class Downloader
         $this->startProgress();
     }
 
+    /**
+     * @param mixed $url
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+    }
+
+    /**
+     * @param mixed $sourcePath
+     */
+    public function setSourcePath($sourcePath)
+    {
+        $this->sourcePath = $sourcePath;
+    }
+
     protected function progress($percentage)
     {
         if ($this->progressBar) {
@@ -89,13 +107,6 @@ class Downloader
         }
 
         $this->progress($percentage);
-    }
-
-    protected function save()
-    {
-        if ($this->data) {
-            $this->save->save($this->data);
-        }
     }
 
     protected function start()
@@ -117,6 +128,29 @@ class Downloader
     {
         if ($this->progressBar) {
             $this->progressBar->start();
+        }
+    }
+
+    public function process($options)
+    {
+        $options = array_merge($this->defaultOptions, $options);
+        $this->setOptions($options);
+
+        $this->download();
+    }
+
+    public function setOptions($options)
+    {
+        if (isset($options['progressBar'])) {
+            $this->setProgressBar($options['progressBar']);
+        }
+
+        if (isset($options['reportUrl'])) {
+            $this->setUrl($options['reportUrl']);
+        }
+
+        if (isset($options['sourcePath'])) {
+            $this->setSourcePath($options['sourcePath']);
         }
     }
 }
