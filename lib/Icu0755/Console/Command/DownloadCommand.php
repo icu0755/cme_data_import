@@ -1,8 +1,9 @@
 <?php
 namespace Icu0755\Console\Command;
 
-use Icu0755\Cme\Downloader;
 use Icu0755\Cme\SettlementReport;
+use Icu0755\Cme\SettlementReport\MailExport;
+use Icu0755\Cme\SettlementReport\ReportImport;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -52,7 +53,7 @@ class DownloadCommand extends Command
     {
         $this->loadConfig('config.json');
         $this->setProgressBar($output);
-        $this->setSourcePath();
+        $this->setSourcePath('stlcur');
         $this->setDropboxPath();
         $this->runHandler();
     }
@@ -65,8 +66,8 @@ class DownloadCommand extends Command
 
         if (!$this->handler) {
             $settlementReportHandlers = array(
-                new SettlementReport\ReportImport(),
-                new SettlementReport\DropboxExport(),
+                new ReportImport(),
+                new MailExport(),
             );
             $this->handler = new SettlementReport($settlementReportHandlers);
         }
