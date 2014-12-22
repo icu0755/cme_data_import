@@ -37,6 +37,10 @@ class DownloadCommand extends Command
 
     protected function loadConfig($config)
     {
+        if (defined('APP_PATH')) {
+            $config = APP_PATH . DIRECTORY_SEPARATOR . $config;
+        }
+
         if (!file_exists($config)) {
             throw new \ErrorException("File $config does not exist!");
         }
